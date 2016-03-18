@@ -43,7 +43,7 @@ app.get('/carts/:id', (req, res) => {
 app.post('/carts', (req, res) => {
     const id = Math.round(Math.random()*1000000);
     carts[id] = [ id ];
-    res.send(id);
+    res.send(`{ cartId: ${id} }`);
 });
 
 // Start the server
