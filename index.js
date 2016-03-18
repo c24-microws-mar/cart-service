@@ -5,6 +5,8 @@ const cors = require('cors');
 const endpoints = require('express-endpoints');
 const gracefulShutdown = require('http-graceful-shutdown');
 const agent = require('multiagent');
+const bodyParser = require('body-parser');
+const mongodb = require('mongodb');
 
 const mongo = require('./mongo-client');
 
@@ -24,6 +26,7 @@ const carts = {};
 
 // Add CORS headers
 app.use(cors());
+app.use(bodyParser.json());
 
 // Add health check endpoint
 app.get(SERVICE_CHECK_HTTP, (req, res) => res.send({ uptime: process.uptime() }));
@@ -33,13 +36,33 @@ app.get(SERVICE_ENDPOINTS, endpoints());
 
 // Add all other service routes
 app.get('/carts/:id', (req, res) => {
-  const id = req.params.id;
-  
-  if (!carts[id]) {
-      return res.status(404).end(`Cart with id ${id} is not found.`);
-  }
-  
-  return res.send(carts[id]);
+    const id = req.params.id;
+    
+    return mongo.createMongoClient(DISCOVERY_SERVERS)
+        .then(db => new Promise((resolve, reject) => {
+            const carts = db.collection('carts');
+            carts.find({ _id: new mongodb.ObjectId(id) }).toArray((err, result) =>{
+                if (err) {
+                    reject(err);
+                } else {
+                    console.log(result);
+                    resolve(result[0]);
+                }
+            });
+        }).then(res=>{
+            db.close(); 
+            return res;
+        }))        
+        .then(result => {
+            res.send(result);
+        })
+        .catch(err => {
+            console.error(err); 
+            res.status(501).end(err.message);
+        })
+        .catch(err =>{
+            console.log(err);
+        }); 
 });
 
 app.post('/carts', (req, res) => {
@@ -48,7 +71,7 @@ app.post('/carts', (req, res) => {
             const carts = db.collection('carts');
             carts.insertMany([
                 { 
-                    items: [ JSON.parse(req.body || '[]') ]
+                    items: req.body
                 }
             ], (err, res) => {
                if (err) {
