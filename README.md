@@ -1,4 +1,4 @@
-# example-service
+# cart-service
 
 [![Build Status](https://travis-ci.org/c24-microws-mar/cart-service.svg)](https://travis-ci.org/c24-microws-mar/cart-service)
 [![Dependencies](https://david-dm.org/c24-microws-mar/cart-service.svg)](https://david-dm.org/badges/shields)

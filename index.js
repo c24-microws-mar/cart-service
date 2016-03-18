@@ -6,6 +6,8 @@ const endpoints = require('express-endpoints');
 const gracefulShutdown = require('http-graceful-shutdown');
 const agent = require('multiagent');
 
+const mongo = require('./mongo-client');
+
 // Define some default values if not set in environment
 const PORT = process.env.PORT || 3000;
 const SHUTDOWN_TIMEOUT = process.env.SHUTDOWN_TIMEOUT || 10000;
@@ -41,9 +43,34 @@ app.get('/carts/:id', (req, res) => {
 });
 
 app.post('/carts', (req, res) => {
-    const id = Math.round(Math.random()*1000000);
-    carts[id] = [ id ];
-    res.send(`{ cartId: ${id} }`);
+    return mongo.createMongoClient(DISCOVERY_SERVERS)
+        .then(db => new Promise((resolve, reject) => {
+            const carts = db.collection('carts');
+            carts.insertMany([
+                { 
+                    items: [ JSON.parse(req.body || '[]') ]
+                }
+            ], (err, res) => {
+               if (err) {
+                   reject(err);
+               } else {
+                   resolve({ cartId: res.ops[0]._id })
+               }
+            });
+        }).then(res=>{
+            db.close(); 
+            return res;
+        }))        
+        .then(result => {
+            res.send(result);
+        })
+        .catch(err => {
+            console.error(err); 
+            res.status(501).end(err.message);
+        })
+        .catch(err =>{
+            console.log(err);
+        });    
 });
 
 // Start the server
