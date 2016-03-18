@@ -16,6 +16,7 @@
     "express": "^4.13.4",
     "express-endpoints": "^1.0.0",
     "http-graceful-shutdown": "^1.0.6",
+    "mongodb": "^2.1.7",
     "multiagent": "^1.1.0"
   },
   "devDependencies": {
