@@ -65,6 +65,58 @@ app.get('/carts/:id', (req, res) => {
         }); 
 });
 
+app.put('/carts/:id', (req, res) => {
+    const id = req.params.id;
+    
+    return mongo.createMongoClient(DISCOVERY_SERVERS)
+        .then(db => new Promise((resolve, reject) => {
+            const carts = db.collection('carts');
+            carts.find({ _id: new mongodb.ObjectId(id) }).toArray((err, result) =>{
+                if (err) {
+                    reject(err);
+                } else {
+                    console.log(result);
+                    resolve(result[0]);
+                }
+            });
+        })
+        .then(obj => new Promise((resolve, reject) => {
+            const carts = db.collection('carts');
+            const items = obj.items;
+            for(let i = 0; i < req.body.length; i++) {
+                console.log(req.body);
+                console.log('Obj:');
+                console.log(obj);
+                const index = items.findIndex(x => x.itemId == req.body[i].itemId);
+                if (index >=0){
+                    items[index].count = req.body[i].count;
+                } else {
+                    items.push(req.body[i]);
+                }                
+            } 
+            carts.update({ _id: new mongodb.ObjectId(id) }, { $set: { items: items }}, (err, res) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(res);
+                }
+            })
+        }))
+        .then(res=>{
+            db.close(); 
+            return res;
+        }))        
+        .then(result => {
+            res.send();
+        })
+        .catch(err => {
+            console.error(err); 
+            res.status(500).end(err.message);
+        })
+        .catch(err =>{
+            console.log(err);
+        }); });
+
 app.post('/carts', (req, res) => {
     return mongo.createMongoClient(DISCOVERY_SERVERS)
         .then(db => new Promise((resolve, reject) => {
