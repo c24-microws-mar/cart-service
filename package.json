@@ -1,0 +1,31 @@
+{
+  "name": "cart-service",
+  "version": "1.0.0",
+  "description": "This is a service example",
+  "author": "Andreas Helmberger <public@ahelmberger.de>",
+  "license": "MIT",
+  "private": true,
+  "repository": "c24-microws-mar/cart-service",
+  "scripts": {
+    "start": "node index.js",
+    "test": "gulp test",
+    "watch": "gulp watch"
+  },
+  "dependencies": {
+    "cors": "^2.7.1",
+    "express": "^4.13.4",
+    "express-endpoints": "^1.0.0",
+    "http-graceful-shutdown": "^1.0.6",
+    "multiagent": "^1.1.0"
+  },
+  "devDependencies": {
+    "expect.js": "^0.3.1",
+    "gulp": "^3.9.1",
+    "gulp-live-server": "0.0.29",
+    "gulp-mocha": "^2.2.0",
+    "gulp-shell": "^0.5.2",
+    "minimist": "^1.2.0",
+    "run-sequence": "^1.1.5",
+    "tiny-shipyard-client": "^1.1.0"
+  }
+}
