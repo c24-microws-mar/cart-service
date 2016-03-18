@@ -18,6 +18,8 @@ const DISCOVERY_SERVERS = process.env.DISCOVERY_SERVERS
 // Create a new express app
 const app = express();
 
+const carts = {};
+
 // Add CORS headers
 app.use(cors());
 
@@ -28,10 +30,20 @@ app.get(SERVICE_CHECK_HTTP, (req, res) => res.send({ uptime: process.uptime() })
 app.get(SERVICE_ENDPOINTS, endpoints());
 
 // Add all other service routes
-app.get('/cart', (req, res) => {
-  res.send([
-    'Robert Downey Jr.'
-  ]);
+app.get('/carts/:id', (req, res) => {
+  const id = req.params.id;
+  
+  if (!carts[id]) {
+      return res.status(404).end(`Cart with id ${id} is not found.`);
+  }
+  
+  return res.send(carts[id]);
+});
+
+app.post('/carts', (req, res) => {
+    const id = Math.round(Math.random()*1000000);
+    carts[id] = [ id ];
+    res.send(id);
 });
 
 // Start the server
